@@ -20,4 +20,3 @@ void error (int status, int errnum, const char *message, ...) {
   if (status)
     exit (status);
 }
-
