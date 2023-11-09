@@ -286,15 +286,27 @@ int ImageMaxval(Image img) { ///
   return img->maxval;
 }
 
-/// Pixel stats
-/// Find the minimum and maximum gray levels in image.
-/// On return,
-/// *min is set to the minimum gray level in the image,
-/// *max is set to the maximum.
-void ImageStats(Image img, uint8* min, uint8* max) { ///
-  assert (img != NULL);
-  // Insert your code here!
+void ImageStats(Image img, uint8* min, uint8* max) {
+  assert(img != NULL);
+
+  // Initialize min and max with the first pixel's gray level
+  *min = img[0];
+  *max = img[0];
+
+  // Iterate through each pixel of the image
+  for (int i = 1; i < img.size(); i++) {
+    // Update min if a smaller gray level is found
+    if (img[i] < *min) {
+      *min = img[i];
+    }
+
+    // Update max if a larger gray level is found
+    if (img[i] > *max) {
+      *max = img[i];
+    }
+  }
 }
+
 
 /// Check if pixel position (x,y) is inside img.
 int ImageValidPos(Image img, int x, int y) { ///
