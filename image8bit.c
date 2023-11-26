@@ -517,7 +517,7 @@ Image ImageRotate(Image img) {
 Image ImageMirror(Image img) {
 	assert (img != NULL);
 	// Insert your code here!
-	Image mirror = ImageCreate(ImageWidth(img),ImageHeight(img),ImageMaxval(img));
+	Image mirror = ImageCreate(ImageWidth(img),ImageHeight(img),ImageMaxval(img)); //cria uma imagem nova vazia
 	if(mirror==NULL)	{	errsave=9; return NULL; }	//verifica a imagem criada
 	
 	int i,j;
@@ -597,7 +597,7 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) {
 	
 	for(i=x;i<ImageWidth(img2)+x;i++) {
 		for(j=y;j<ImageHeight(img2)+y;j++) {
-			double tempval_d = ImageGetPixel(img1,i,j)+alpha*(ImageGetPixel(img2,i-x,j-y)-ImageGetPixel(img1,i,j)); // valor temporário do pixel
+			double tempval_d = ImageGetPixel(img1,i,j)+alpha*(ImageGetPixel(img2,i-x,j-y)-ImageGetPixel(img1,i,j)); // valor temporario do pixel
 			int tempval_i = tempval_d;
 			int pixel = (tempval_i == ((int)(tempval_d+0.5))) ? tempval_i : tempval_i + 1; //arredondamento do valor do pixel
 			ImageSetPixel(img1,i,j,pixel);
