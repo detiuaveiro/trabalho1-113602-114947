@@ -47,10 +47,10 @@ const uint8 PixMax = 255;
 
 // Internal structure for storing 8-bit graymap images
 struct image {
-  int width;
-  int height;
-  int maxval;   // maximum gray value (pixels with maxval are pure WHITE)
-  uint8* pixel; // pixel data (a raster scan)
+	int width;
+	int height;
+	int maxval;   // maximum gray value (pixels with maxval are pure WHITE)
+	uint8* pixel; // pixel data (a raster scan)
 };
 
 
@@ -88,7 +88,7 @@ static char* errCause;
 /// After a successful operation, the result is not garanteed (it might be
 /// the previous error cause).  It is not meant to be used in that situation!
 char* ImageErrMsg() { ///
-  return errCause;
+	return errCause;
 }
 
 
@@ -136,18 +136,18 @@ char* ImageErrMsg() { ///
 // Propagates the condition.
 // Preserves global errno!
 static int check(int condition, const char* failmsg) {
-  errCause = (char*)(condition ? "" : failmsg);
-  return condition;
+	errCause = (char*)(condition ? "" : failmsg);
+	return condition;
 }
 
 
 /// Init Image library.  (Call once!)
 /// Currently, simply calibrate instrumentation and set names of counters.
 void ImageInit(void) { ///
-  InstrCalibrate();
-  InstrName[0] = "pixmem";  // InstrCount[0] will count pixel array acesses
-  // Name other counters here...
-  
+	InstrCalibrate();
+	InstrName[0] = "pixmem";  // InstrCount[0] will count pixel array acesses
+	// Name other counters here...
+	
 }
 
 // Macros to simplify accessing instrumentation counters:
@@ -167,19 +167,20 @@ void ImageInit(void) { ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
 /// On failure, returns NULL and errno/errCause are set accordingly.
-Image ImageCreate(int width, int height, uint8 maxval) { ///
-  assert (width >= 0);
-  assert (height >= 0);
-  assert (0 < maxval && maxval <= PixMax);
-  // Insert your code here!
+Image ImageCreate(int width, int height, uint8 maxval) {
+	assert (width >= 0);
+	assert (height >= 0);
+	assert (0 < maxval && maxval <= PixMax);
+	// Insert your code here!
 	Image imagem;
-	int temp=width*height;		//variavel temporaria para salvaguardar o numero de pixeis da imagem
+	int temp=width*height; // variavel temporaria para guardar numero de pixeis da imagem
 	
 	//verifica se existe memoria para a criaçao de um ponteiro de imagem
 	if(!check(((imagem = (Image) malloc (sizeof (struct image))) != NULL), "NO MEMORY")){
 		errsave=1;
 		return NULL;
 	}
+
 	//tenta reservar memoria para o array que ira conter os bits da imagem
 	if(!check(((imagem->pixel = (uint8 *) calloc (temp, sizeof (uint8))) != NULL),"NO MEMORY")){
 		free(imagem);
@@ -192,7 +193,7 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 	imagem->maxval=maxval;
 	errsave=0;
 	 
-	 return imagem;
+	return imagem;																						  
 }
 
 /// Destroy the image pointed to by (*imgp).
@@ -201,18 +202,17 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 /// Ensures: (*imgp)==NULL.
 /// Should never fail, and should preserve global errno/errCause.
 void ImageDestroy(Image* imgp) { ///
-  assert (imgp != NULL);
-  // Insert your code here!
-  Image delete = *imgp;
+	assert (imgp != NULL);
+	// Insert your code here!
+	Image delete = *imgp;
 	
 	if(imgp!=NULL){
-							 //libertaçao da memoria
 		free(delete->pixel); //liberta a memoria reservada para o array
 		free(delete);		 //liberta memoria reservada para o ponteiro  
 		imgp=NULL;			 //coloca a referencia a nulo
 		
 		errsave=0;
-	}
+	}						 
 }
 
 
@@ -225,12 +225,12 @@ void ImageDestroy(Image* imgp) { ///
 // Comments start with a # and continue until the end-of-line, inclusive.
 // Returns the number of comments skipped.
 static int skipComments(FILE* f) {
-  char c;
-  int i = 0;
-  while (fscanf(f, "#%*[^\n]%c", &c) == 1 && c == '\n') {
-    i++;
-  }
-  return i;
+	char c;
+	int i = 0;
+	while (fscanf(f, "#%*[^\n]%c", &c) == 1 && c == '\n') {
+		i++;
+	}
+	return i;
 }
 
 /// Load a raw PGM file.
@@ -239,37 +239,37 @@ static int skipComments(FILE* f) {
 /// (The caller is responsible for destroying the returned image!)
 /// On failure, returns NULL and errno/errCause are set accordingly.
 Image ImageLoad(const char* filename) { ///
-  int w, h;
-  int maxval;
-  char c;
-  FILE* f = NULL;
-  Image img = NULL;
+	int w, h;
+	int maxval;
+	char c;
+	FILE* f = NULL;
+	Image img = NULL;
 
-  int success = 
-  check( (f = fopen(filename, "rb")) != NULL, "Open failed" ) &&
-  // Parse PGM header
-  check( fscanf(f, "P%c ", &c) == 1 && c == '5' , "Invalid file format" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d ", &w) == 1 && w >= 0 , "Invalid width" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d ", &h) == 1 && h >= 0 , "Invalid height" ) &&
-  skipComments(f) >= 0 &&
-  check( fscanf(f, "%d", &maxval) == 1 && 0 < maxval && maxval <= (int)PixMax , "Invalid maxval" ) &&
-  check( fscanf(f, "%c", &c) == 1 && isspace(c) , "Whitespace expected" ) &&
-  // Allocate image
-  (img = ImageCreate(w, h, (uint8)maxval)) != NULL &&
-  // Read pixels
-  check( fread(img->pixel, sizeof(uint8), w*h, f) == w*h , "Reading pixels" );
-  PIXMEM += (unsigned long)(w*h);  // count pixel memory accesses
+	int success = 
+	check( (f = fopen(filename, "rb")) != NULL, "Open failed" ) &&
+	// Parse PGM header
+	check( fscanf(f, "P%c ", &c) == 1 && c == '5' , "Invalid file format" ) &&
+	skipComments(f) >= 0 &&
+	check( fscanf(f, "%d ", &w) == 1 && w >= 0 , "Invalid width" ) &&
+	skipComments(f) >= 0 &&
+	check( fscanf(f, "%d ", &h) == 1 && h >= 0 , "Invalid height" ) &&
+	skipComments(f) >= 0 &&
+	check( fscanf(f, "%d", &maxval) == 1 && 0 < maxval && maxval <= (int)PixMax , "Invalid maxval" ) &&
+	check( fscanf(f, "%c", &c) == 1 && isspace(c) , "Whitespace expected" ) &&
+	// Allocate image
+	(img = ImageCreate(w, h, (uint8)maxval)) != NULL &&
+	// Read pixels
+	check( fread(img->pixel, sizeof(uint8), w*h, f) == w*h , "Reading pixels" );
+	PIXMEM += (unsigned long)(w*h);  // count pixel memory accesses
 
-  // Cleanup
-  if (!success) {
-    errsave = errno;
-    ImageDestroy(&img);
-    errno = errsave;
-  }
-  if (f != NULL) fclose(f);
-  return img;
+	// Cleanup
+	if (!success) {
+		errsave = errno;
+		ImageDestroy(&img);
+		errno = errsave;
+	}
+	if (f != NULL) fclose(f);
+	return img;
 }
 
 /// Save image to PGM file.
@@ -277,21 +277,21 @@ Image ImageLoad(const char* filename) { ///
 /// On failure, returns 0, errno/errCause are set appropriately, and
 /// a partial and invalid file may be left in the system.
 int ImageSave(Image img, const char* filename) { ///
-  assert (img != NULL);
-  int w = img->width;
-  int h = img->height;
-  uint8 maxval = img->maxval;
-  FILE* f = NULL;
+	assert (img != NULL);
+	int w = img->width;
+	int h = img->height;
+	uint8 maxval = img->maxval;
+	FILE* f = NULL;
 
-  int success =
-  check( (f = fopen(filename, "wb")) != NULL, "Open failed" ) &&
-  check( fprintf(f, "P5\n%d %d\n%u\n", w, h, maxval) > 0, "Writing header failed" ) &&
-  check( fwrite(img->pixel, sizeof(uint8), w*h, f) == w*h, "Writing pixels failed" ); 
-  PIXMEM += (unsigned long)(w*h);  // count pixel memory accesses
+	int success =
+	check( (f = fopen(filename, "wb")) != NULL, "Open failed" ) &&
+	check( fprintf(f, "P5\n%d %d\n%u\n", w, h, maxval) > 0, "Writing header failed" ) &&
+	check( fwrite(img->pixel, sizeof(uint8), w*h, f) == w*h, "Writing pixels failed" ); 
+	PIXMEM += (unsigned long)(w*h);  // count pixel memory accesses
 
-  // Cleanup
-  if (f != NULL) fclose(f);
-  return success;
+	// Cleanup
+	if (f != NULL) fclose(f);
+	return success;
 }
 
 
@@ -301,20 +301,20 @@ int ImageSave(Image img, const char* filename) { ///
 
 /// Get image width
 int ImageWidth(Image img) { ///
-  assert (img != NULL);
-  return img->width;
+	assert (img != NULL);
+	return img->width;
 }
 
 /// Get image height
 int ImageHeight(Image img) { ///
-  assert (img != NULL);
-  return img->height;
+	assert (img != NULL);
+	return img->height;
 }
 
 /// Get image maximum gray level
 int ImageMaxval(Image img) { ///
-  assert (img != NULL);
-  return img->maxval;
+	assert (img != NULL);
+	return img->maxval;
 }
 
 /// Pixel stats
@@ -323,36 +323,37 @@ int ImageMaxval(Image img) { ///
 /// *min is set to the minimum gray level in the image,
 /// *max is set to the maximum.
 void ImageStats(Image img, uint8* min, uint8* max) {
-  assert(img != NULL);
+	assert (img != NULL);
+	// Insert your code here!
 
-  // Initialize min and max with the first pixel's gray level
-  *min = img[0];
-  *max = img[0];
-
-  // Iterate through each pixel of the image
-  for (int i = 1; i < img.size(); i++) {
-    // Update min if a smaller gray level is found
-    if (img[i] < *min) {
-      *min = img[i];
-    }
-
-    // Update max if a larger gray level is found
-    if (img[i] > *max) {
-      *max = img[i];
-    }
-  }
+	int tmin, tmax;
+	int i;
+	//atribui aos parametros o primeiro valor do array
+	tmin=img->pixel[0];
+	tmax=img->pixel[0];
+	
+	for(i=1;i<(img->width * img->height);i++){
+		if(tmin>img->pixel[i]) 	tmin=img->pixel[i];
+		else if(tmax<img->pixel[i])	tmax=img->pixel[i];
+	}	
+	
+	*min=tmin;
+	*max=tmax;
+	errsave=0;														  
 }
 
 /// Check if pixel position (x,y) is inside img.
 int ImageValidPos(Image img, int x, int y) { ///
-  assert (img != NULL);
-  return (0 <= x && x < img->width) && (0 <= y && y < img->height);
+	assert (img != NULL);
+	return (0 <= x && x < img->width) && (0 <= y && y < img->height);
 }
 
 /// Check if rectangular area (x,y,w,h) is completely inside img.
 int ImageValidRect(Image img, int x, int y, int w, int h) { ///
-  assert (img != NULL);
-  // Insert your code here!
+	assert (img != NULL);
+	// Insert your code here!
+	errsave=0;
+	return ImageValidPos(img, x, y) && ImageValidPos(img, x+w, y+h);
 }
 
 /// Pixel get & set operations
@@ -366,26 +367,27 @@ int ImageValidRect(Image img, int x, int y, int w, int h) { ///
 // This internal function is used in ImageGetPixel / ImageSetPixel. 
 // The returned index must satisfy (0 <= index < img->width*img->height)
 static inline int G(Image img, int x, int y) {
-  int index;
-  // Insert your code here!
-  assert (0 <= index && index < img->width*img->height);
-  return index;
+	int index;
+	// Insert your code here!
+	index=img->width*y + x;
+	assert (0 <= index && index < img->width*img->height);
+	return index;
 }
 
 /// Get the pixel (level) at position (x,y).
 uint8 ImageGetPixel(Image img, int x, int y) { ///
-  assert (img != NULL);
-  assert (ImageValidPos(img, x, y));
-  PIXMEM += 1;  // count one pixel access (read)
-  return img->pixel[G(img, x, y)];
+	assert (img != NULL);
+	assert (ImageValidPos(img, x, y));
+	PIXMEM += 1;  // count one pixel access (read)
+	return img->pixel[G(img, x, y)];
 } 
 
 /// Set the pixel at position (x,y) to new level.
 void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
-  assert (img != NULL);
-  assert (ImageValidPos(img, x, y));
-  PIXMEM += 1;  // count one pixel access (store)
-  img->pixel[G(img, x, y)] = level;
+	assert (img != NULL);
+	assert (ImageValidPos(img, x, y));
+	PIXMEM += 1;  // count one pixel access (store)
+	img->pixel[G(img, x, y)] = level;
 } 
 
 
@@ -400,27 +402,68 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 /// Transform image to negative image.
 /// This transforms dark pixels to light pixels and vice-versa,
 /// resulting in a "photographic negative" effect.
-void ImageNegative(Image img) { ///
-  assert (img != NULL);
-  // Insert your code here!
+void ImageNegative(Image img) {
+	assert (img != NULL);
+	// Insert your code here!
+	int i,j;
+
+	for(i=0;i<img->width;i++) {	
+		for(j=0;j<img->height;j++) {
+			ImageSetPixel(img,i,j,(255-ImageGetPixel(img,i,j)));	//subtrai ao valor maximo (255) o valor do pixel
+			errsave=0;
+		}
+	}
 }
 
 /// Apply threshold to image.
 /// Transform all pixels with level<thr to black (0) and
 /// all pixels with level>=thr to white (maxval).
-void ImageThreshold(Image img, uint8 thr) { ///
-  assert (img != NULL);
-  // Insert your code here!
+void ImageThreshold(Image img, uint8 thr) {
+	assert (img != NULL);
+	// Insert your code here!
+	if(check((thr<0.0),"Invalid Threshold value!"))	 {	errsave=4;return ; }
+	int i,j;
+
+	for(i=0;i<img->width;i++){    
+		for(j=0;j<img->height;j++){
+			
+			if(ImageGetPixel(img,i,j)<thr)
+				ImageSetPixel(img,i,j,0);	//transforma os pixeis com valores inferiores ao thr para valor 0
+			
+			else
+				ImageSetPixel(img,i,j,PixMax);	//transforma os pixeis com valores superiores ao thr para valor 255
+		}
+	}
+	
+	errsave=0;
 }
 
 /// Brighten image by a factor.
 /// Multiply each pixel level by a factor, but saturate at maxval.
 /// This will brighten the image if factor>1.0 and
 /// darken the image if factor<1.0.
-void ImageBrighten(Image img, double factor) { ///
-  assert (img != NULL);
-  // ? assert (factor >= 0.0);
-  // Insert your code here!
+void ImageBrighten(Image img, double factor) {
+	assert (img != NULL);
+	// ? assert (factor >= 0.0);
+	// Insert your code here!
+	
+	if(check((factor<0.0),"Invalid Factor value!"))	 {	errsave=5;	return ; }
+	int i,j;
+
+	for(i=0;i<img->width;i++){    
+		for(j=0;j<img->height;j++){
+			
+			double tempval_d = (ImageGetPixel(img,i,j)*factor); //valor temporario do ponto de saturação do pixel
+			int tempval_i = tempval_d;
+			int val = (tempval_i == ((int)(tempval_d+0.5))) ? tempval_i : tempval_i + 1; //arredondamento do valor do pixel
+
+			if (val > 255) 
+				ImageSetPixel(img,i,j,255);	//saturaçao maxima
+			else
+				ImageSetPixel(img,i,j,val);	
+		}
+	}
+	errsave=0;	
 }
 
 
@@ -445,9 +488,23 @@ void ImageBrighten(Image img, double factor) { ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
 /// On failure, returns NULL and errno/errCause are set accordingly.
-Image ImageRotate(Image img) { ///
-  assert (img != NULL);
-  // Insert your code here!
+Image ImageRotate(Image img) {
+	assert (img != NULL);
+	// Insert your code here!
+	
+	img=ImageMirror(img);
+	Image rotate = ImageCreate(ImageHeight(img),ImageWidth(img),ImageMaxval(img)); 
+	if(rotate==NULL){	errsave=8; return NULL; }	//verifica a imagem criada
+	
+	int i,j;
+	
+	for(i=0;i<ImageWidth(img);i++)
+		for(j=0;j<ImageHeight(img);j++){
+		ImageSetPixel(rotate,j,i,ImageGetPixel(img,i,j));	//aqui calculamos a matriz transposta dos pixeis
+	}
+
+	errsave=0;
+	return rotate; 
 }
 
 /// Mirror an image = flip left-right.
@@ -457,9 +514,19 @@ Image ImageRotate(Image img) { ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
 /// On failure, returns NULL and errno/errCause are set accordingly.
-Image ImageMirror(Image img) { ///
-  assert (img != NULL);
-  // Insert your code here!
+Image ImageMirror(Image img) {
+	assert (img != NULL);
+	// Insert your code here!
+	Image mirror = ImageCreate(ImageWidth(img),ImageHeight(img),ImageMaxval(img));
+	if(mirror==NULL)	{	errsave=9; return NULL; }	//verifica a imagem criada
+	
+	int i,j;
+	for(i=0;i<ImageWidth(img);i++)
+		for(j=ImageHeight(img)-1;j>=0;j--)
+			ImageSetPixel(mirror,i,ImageHeight(img)-1-j,ImageGetPixel(img,ImageWidth(img)-1-i,ImageHeight(img)-1-j));
+		
+	errsave=0;
+	return mirror; 
 }
 
 /// Crop a rectangular subimage from img.
@@ -474,10 +541,22 @@ Image ImageMirror(Image img) { ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
 /// On failure, returns NULL and errno/errCause are set accordingly.
-Image ImageCrop(Image img, int x, int y, int w, int h) { ///
-  assert (img != NULL);
-  assert (ImageValidRect(img, x, y, w, h));
-  // Insert your code here!
+Image ImageCrop(Image img, int x, int y, int w, int h) {
+	assert (img != NULL);
+	assert (ImageValidRect(img, x, y, w, h));
+	// Insert your code here!
+
+	Image croped = ImageCreate(w,h,ImageMaxval(img));	//cria uma imagem nova vazia
+	if(croped==NULL)	{	errsave=6; return NULL; }	//verifica a imagem criada
+	
+	int i,j;
+	for(i=0;i<w;i++) {
+		for(j=0;j<h;j++) {
+			ImageSetPixel(croped,i,j,ImageGetPixel(img,i+x,j+y));
+		}
+	}
+	errsave=0;
+	return croped;									   
 }
 
 
@@ -487,11 +566,20 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
 /// Paste img2 into position (x, y) of img1.
 /// This modifies img1 in-place: no allocation involved.
 /// Requires: img2 must fit inside img1 at position (x, y).
-void ImagePaste(Image img1, int x, int y, Image img2) { ///
-  assert (img1 != NULL);
-  assert (img2 != NULL);
-  assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
+void ImagePaste(Image img1, int x, int y, Image img2) {
+	assert (img1 != NULL);
+	assert (img2 != NULL);
+	assert (ImageValidRect(img1, x, y, img2->width, img2->height));
+	// Insert your code here!
+	int i,j;
+	
+	for(i=x;i<ImageWidth(img2)+x;i++) {
+		for(j=y;j<ImageHeight(img2)+y;j++) {
+			ImageSetPixel(img1,i,j,ImageGetPixel(img2,i-x,j-y));
+		}
+	}
+		
+	errsave=0;
 }
 
 /// Blend an image into a larger image.
@@ -500,31 +588,67 @@ void ImagePaste(Image img1, int x, int y, Image img2) { ///
 /// Requires: img2 must fit inside img1 at position (x, y).
 /// alpha usually is in [0.0, 1.0], but values outside that interval
 /// may provide interesting effects.  Over/underflows should saturate.
-void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
-  assert (img1 != NULL);
-  assert (img2 != NULL);
-  assert (ImageValidRect(img1, x, y, img2->width, img2->height));
-  // Insert your code here!
+void ImageBlend(Image img1, int x, int y, Image img2, double alpha) {
+	assert (img1 != NULL);
+	assert (img2 != NULL);
+	assert (ImageValidRect(img1, x, y, img2->width, img2->height));
+	// Insert your code here!
+	int i,j;
+	
+	for(i=x;i<ImageWidth(img2)+x;i++) {
+		for(j=y;j<ImageHeight(img2)+y;j++) {
+			double tempval_d = ImageGetPixel(img1,i,j)+alpha*(ImageGetPixel(img2,i-x,j-y)-ImageGetPixel(img1,i,j)); // valor temporário do pixel
+			int tempval_i = tempval_d;
+			int pixel = (tempval_i == ((int)(tempval_d+0.5))) ? tempval_i : tempval_i + 1; //arredondamento do valor do pixel
+			ImageSetPixel(img1,i,j,pixel);
+		}
+	}
+	
+	errsave=0;
 }
 
 /// Compare an image to a subimage of a larger image.
 /// Returns 1 (true) if img2 matches subimage of img1 at pos (x, y).
 /// Returns 0, otherwise.
-int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
-  assert (img1 != NULL);
-  assert (img2 != NULL);
-  assert (ImageValidPos(img1, x, y));
-  // Insert your code here!
+int ImageMatchSubImage(Image img1, int x, int y, Image img2) {
+	assert (img1 != NULL);
+	assert (img2 != NULL);
+	assert (ImageValidPos(img1, x, y));
+	// Insert your code here!
+	if(!ImageValidPos(img1,ImageWidth(img2)+x-1,ImageHeight(img2)+y-1))  return 0;
+	int i,j;
+		
+	for(i=x;i<ImageWidth(img2)+x;i++)
+		for(j=y;j<ImageHeight(img2)+y;j++)
+			if(ImageGetPixel(img1,i,j)!=ImageGetPixel(img2,i-x,j-y))
+				return 0;
+	
+	errsave=0;
+	return 1;																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															 
 }
 
 /// Locate a subimage inside another image.
 /// Searches for img2 inside img1.
 /// If a match is found, returns 1 and matching position is set in vars (*px, *py).
 /// If no match is found, returns 0 and (*px, *py) are left untouched.
-int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
-  assert (img1 != NULL);
-  assert (img2 != NULL);
-  // Insert your code here!
+int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) {
+	assert (img1 != NULL);
+	assert (img2 != NULL);
+	// Insert your code here!
+	int i,j;
+
+	for(i=0;i<=ImageWidth(img1)-ImageWidth(img2);i++) {
+		for(j=0;j<=ImageHeight(img1)-ImageHeight(img2);j++) {
+			if(ImageMatchSubImage(img1,i,j,img2)){
+				*px=i;		//
+				*py=j;		// guarda os valores de x e y
+				errsave=0;
+				return 1;
+			}
+		}	
+	}
+	errsave=0;  
+	return 0;																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															 
 }
 
 
@@ -534,6 +658,38 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// Each pixel is substituted by the mean of the pixels in the rectangle
 /// [x-dx, x+dx]x[y-dy, y+dy].
 /// The image is changed in-place.
-void ImageBlur(Image img, int dx, int dy) { ///
-  // Insert your code here!
+void ImageBlur(Image img, int dx, int dy) {
+	// Insert your code here!
+	
+	Image blur = ImageCreate(ImageHeight(img),ImageWidth(img),ImageMaxval(img));
+
+	for (int x = 0; x < ImageHeight(img); x++) {
+		for (int y = 0; y < ImageWidth(img); y++) {
+			int sum = 0;
+			int count = 0;
+			for (int j = -dx; j <= dx; j++) {
+				for (int i = -dy; i <= dy; i++) {
+					int height = (2*(x + j)+1 > 0) ? x + j : 0;
+					int width = (2*(y + i)+1 > 0) ? y + i : 0;
+					
+					height = (height < ImageHeight(img)) ? height : ImageHeight(img)-1;
+					width = (width < ImageHeight(img)) ? width : ImageHeight(img)-1;
+					
+					sum += ImageGetPixel(img, height, width);
+					count++;
+				}
+			}
+			double mean_d = sum/count;
+			int mean_i = mean_d;
+			int mean = mean_i == ((int)(mean_d+0.5)) ? mean_i : mean_i + 1;
+			ImageSetPixel(blur, x, y, mean);
+		}
+	}
+
+	for (int x = 0; x < ImageHeight(img); x++) {
+		for (int y = 0; y < ImageWidth(img); y++) {
+			ImageSetPixel(img, x, y, ImageGetPixel(blur, x, y));
+		}
+	}
+	errsave=0;
 }
