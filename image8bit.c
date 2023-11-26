@@ -10,11 +10,11 @@
 /// 2013, 2023
 
 // Student authors (fill in below):
-// NMec:  Name:
+// NMec: 113602  Name: João Carlos Bastos Pinho
+// NMec: 114947  Name: Guilherme da Costa Gabino
 // 
 // 
-// 
-// Date:
+// Date: 26/11/2023
 //
 
 #include "image8bit.h"
