@@ -172,6 +172,27 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
   // Insert your code here!
+	Image imagem;
+	int temp=width*height;		//variavel temporaria para salvaguardar o numero de pixeis da imagem
+	
+	//verifica se existe memoria para a criaçao de um ponteiro de imagem
+	if(!check(((imagem = (Image) malloc (sizeof (struct image))) != NULL), "NO MEMORY")){
+		errsave=1;
+		return NULL;
+	}
+	//tenta reservar memoria para o array que ira conter os bits da imagem
+	if(!check(((imagem->pixel = (uint8 *) calloc (temp, sizeof (uint8))) != NULL),"NO MEMORY")){
+		free(imagem);
+		errsave=1;
+		return NULL;
+	}
+	
+	imagem->width=width;
+	imagem->height=height;
+	imagem->maxval=maxval;
+	errsave=0;
+	 
+	 return imagem;
 }
 
 /// Destroy the image pointed to by (*imgp).
@@ -182,6 +203,16 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 void ImageDestroy(Image* imgp) { ///
   assert (imgp != NULL);
   // Insert your code here!
+  Image delete = *imgp;
+	
+	if(imgp!=NULL){
+							 //libertaçao da memoria
+		free(delete->pixel); //liberta a memoria reservada para o array
+		free(delete);		 //liberta memoria reservada para o ponteiro  
+		imgp=NULL;			 //coloca a referencia a nulo
+		
+		errsave=0;
+	}
 }
 
 
@@ -286,6 +317,11 @@ int ImageMaxval(Image img) { ///
   return img->maxval;
 }
 
+/// Pixel stats
+/// Find the minimum and maximum gray levels in image.
+/// On return,
+/// *min is set to the minimum gray level in the image,
+/// *max is set to the maximum.
 void ImageStats(Image img, uint8* min, uint8* max) {
   assert(img != NULL);
 
@@ -306,7 +342,6 @@ void ImageStats(Image img, uint8* min, uint8* max) {
     }
   }
 }
-
 
 /// Check if pixel position (x,y) is inside img.
 int ImageValidPos(Image img, int x, int y) { ///
